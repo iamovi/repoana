@@ -105,7 +105,7 @@ npm run dev
 - 60 requests per hour per IP address
 - Sufficient for testing and personal use
 
-### With Personal Access Token (Optional)
+### With Personal Access Token (Optional, use for more api requests)
 - 5,000 requests per hour
 - Create token at: https://github.com/settings/tokens
 - No special permissions needed

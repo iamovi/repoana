@@ -134,7 +134,7 @@ function App() {
       }}>
         <p style={{ fontWeight: '600', color: '#000000' }}>Made with ❤️ by Ovi ren</p>
         <p style={{ fontSize: '0.9rem', marginTop: '10px' }}>
-          Rate limit: 60 requests/hour (unauthenticated) <br /> but i used personal access tokens to increase it to 5000 requests/hour. Enjoy!
+          Rate limit: 60 requests/hour (unauthenticated) <br /> (¬‿¬) use locally with your own GitHub token for higher limits!
         </p>
       </footer>
     </div>
