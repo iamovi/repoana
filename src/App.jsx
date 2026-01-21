@@ -17,11 +17,15 @@ function App() {
     setResults(null);
 
     try {
+      console.log('Analyzing URL:', url);
+      
       // Parse the GitHub URL
       const { owner, repo } = parseRepoUrl(url);
+      console.log('Parsed:', owner, repo);
 
       // Fetch repository data
       const data = await fetchRepoData(owner, repo);
+      console.log('Data fetched successfully');
 
       // Calculate health score
       const healthData = calculateHealthScore(data);
@@ -41,8 +45,18 @@ function App() {
       }, 100);
 
     } catch (err) {
-      setError(err.message || 'An error occurred while analyzing the repository');
-      console.error('Analysis error:', err);
+      console.error('Error caught:', err);
+      const errorMessage = err.message || 'An unexpected error occurred while analyzing the repository';
+      console.log('Setting error:', errorMessage);
+      setError(errorMessage);
+      
+      // Scroll to top to show error
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }, 100);
     } finally {
       setLoading(false);
     }
@@ -51,7 +65,7 @@ function App() {
   return (
     <div className="container">
       <div className="header">
-        <h1>Repo Health Analyzer</h1>
+        <h1>GitHub Repo Health Scanner</h1>
         <p>Analyze repository health, code quality, and maintenance status</p>
       </div>
 
@@ -69,10 +83,12 @@ function App() {
         </div>
       )}
 
-      {error && (
+      {error && !loading && (
         <div className="card">
           <div className="error">
-            <strong>Error:</strong> {error}
+            <div style={{ fontSize: '48px', marginBottom: '15px' }}>⚠️</div>
+            <strong style={{ fontSize: '1.2rem', display: 'block', marginBottom: '10px' }}>Error</strong>
+            <p style={{ fontSize: '1rem', lineHeight: '1.6' }}>{error}</p>
           </div>
         </div>
       )}

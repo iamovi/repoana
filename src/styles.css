@@ -120,10 +120,12 @@ body {
   background: #000000;
   border: 2px solid #000000;
   color: #ffffff;
-  padding: 20px;
+  padding: 30px;
   border-radius: 0;
   margin: 20px 0;
   font-family: 'Courier New', monospace;
+  text-align: center;
+  box-shadow: 8px 8px 0 #333333;
 }
 
 .score-circle {

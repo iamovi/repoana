@@ -13,16 +13,23 @@ const api = axios.create({
 });
 
 export const parseRepoUrl = (url) => {
-  const regex = /github\.com\/([^\/]+)\/([^\/]+)/;
+  const regex = /github\.com\/([^\/]+)\/([^\/\?#]+)/;
   const match = url.match(regex);
   
   if (!match) {
-    throw new Error('Invalid GitHub URL. Format: https://github.com/owner/repo');
+    throw new Error('Invalid GitHub URL format. Please use: https://github.com/owner/repo');
+  }
+  
+  const owner = match[1];
+  const repo = match[2].replace('.git', '').replace(/\/$/, ''); // Remove .git and trailing slash
+  
+  if (!owner || !repo) {
+    throw new Error('Invalid GitHub URL. Could not extract owner and repository name.');
   }
   
   return {
-    owner: match[1],
-    repo: match[2].replace('.git', '')
+    owner,
+    repo
   };
 };
 
@@ -46,6 +53,29 @@ export const fetchRepoData = async (owner, repo) => {
       api.get(`/repos/${owner}/${repo}/community/profile`)
     ]);
 
+    // Check if the main repo request failed
+    if (repoResponse.status === 'rejected') {
+      const error = repoResponse.reason;
+      const status = error.response?.status;
+      const rateLimitRemaining = error.response?.headers?.['x-ratelimit-remaining'];
+      
+      if (status === 404) {
+        throw new Error('Repository not found. Please check that the repository exists and the URL is correct.');
+      } else if (status === 403) {
+        // Check if it's a rate limit issue
+        if (rateLimitRemaining === '0' || rateLimitRemaining === 0) {
+          const resetTime = error.response?.headers?.['x-ratelimit-reset'];
+          const resetDate = resetTime ? new Date(resetTime * 1000).toLocaleTimeString() : 'soon';
+          throw new Error(`GitHub API rate limit exceeded! You can only analyze about 8 repos per hour without a token. Limit resets at ${resetDate}. Add a GitHub token to increase limit to 5000/hour.`);
+        }
+        throw new Error('Access forbidden. This repository might be private.');
+      } else if (status === 401) {
+        throw new Error('Authentication required. This repository is private and requires a GitHub token.');
+      } else {
+        throw new Error(`Failed to fetch repository: ${error.message || 'Unknown error'}`);
+      }
+    }
+
     const getResponseData = (response) => {
       return response.status === 'fulfilled' ? response.value.data : null;
     };
@@ -60,12 +90,28 @@ export const fetchRepoData = async (owner, repo) => {
       community: getResponseData(communityResponse) || {}
     };
   } catch (error) {
-    if (error.response?.status === 404) {
-      throw new Error('Repository not found. Please check the URL.');
-    } else if (error.response?.status === 403) {
-      throw new Error('API rate limit exceeded. Please try again later or add a GitHub token.');
+    // Re-throw if already a custom error message
+    if (error.message && !error.response) {
+      throw error;
+    }
+    
+    // Handle axios errors
+    const status = error.response?.status;
+    const rateLimitRemaining = error.response?.headers?.['x-ratelimit-remaining'];
+    
+    if (status === 404) {
+      throw new Error('Repository not found. Please check that the repository exists and the URL is correct.');
+    } else if (status === 403) {
+      if (rateLimitRemaining === '0' || rateLimitRemaining === 0) {
+        const resetTime = error.response?.headers?.['x-ratelimit-reset'];
+        const resetDate = resetTime ? new Date(resetTime * 1000).toLocaleTimeString() : 'soon';
+        throw new Error(`GitHub API rate limit exceeded! You can only analyze about 8 repos per hour without a token. Limit resets at ${resetDate}. Add a GitHub token to increase limit to 5000/hour.`);
+      }
+      throw new Error('Access forbidden. This repository might be private.');
+    } else if (status === 401) {
+      throw new Error('Authentication required. This repository is private and requires a GitHub token.');
     } else {
-      throw new Error('Failed to fetch repository data. Please try again.');
+      throw new Error(`Failed to fetch repository data: ${error.message || 'Unknown error'}.`);
     }
   }
 };
@@ -86,6 +132,19 @@ export const getReadmeQuality = (contents) => {
   if (readme.size > 2000) return 75;
   if (readme.size > 500) return 50;
   return 25;
+};
+
+export const checkRateLimit = async () => {
+  try {
+    const response = await api.get('/rate_limit');
+    return {
+      remaining: response.data.rate.remaining,
+      limit: response.data.rate.limit,
+      reset: new Date(response.data.rate.reset * 1000)
+    };
+  } catch (error) {
+    return null;
+  }
 };
 
 export const calculateDaysSince = (dateString) => {
