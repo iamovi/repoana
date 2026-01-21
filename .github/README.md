@@ -33,10 +33,10 @@ A production-ready web application that analyzes GitHub repositories and provide
 
 ```bash
 # 1. Clone or create the project
-mkdir github-repo-health-scanner
-cd github-repo-health-scanner
+git clone https://github.com/iamovi/repoana.git
 
-# 2. Create all the files (follow the setup guide)
+# 2. Change directory
+cd github-repo-health-scanner
 
 # 3. Install dependencies
 npm install
@@ -44,7 +44,7 @@ npm install
 # 4. Start development server
 npm run dev
 
-# 5. Open browser at http://localhost:5173
+# 5. Open browser at http://localhost:5173/repoana
 ```
 
 ## 🎯 How It Works
