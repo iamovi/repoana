@@ -36,7 +36,7 @@ A production-ready web application that analyzes GitHub repositories and provide
 git clone https://github.com/iamovi/repoana.git
 
 # 2. Change directory
-cd github-repo-health-scanner
+cd repoana
 
 # 3. Install dependencies
 npm install
