@@ -65,7 +65,7 @@ function App() {
   return (
     <div className="container">
       <div className="header">
-        <h1>GitHub Repo Health Scanner</h1>
+        <h1>Repo Health Analyzer</h1>
         <p>Analyze repository health, code quality, and maintenance status</p>
       </div>
 
@@ -134,7 +134,7 @@ function App() {
       }}>
         <p style={{ fontWeight: '600', color: '#000000' }}>Made with ❤️ by Ovi | Powered by GitHub API</p>
         <p style={{ fontSize: '0.9rem', marginTop: '10px' }}>
-          Rate limit: 60 requests/hour (unauthenticated)
+          Rate limit: 60 requests/hour (unauthenticated) <br /> but i used personal access tokens to increase it to 5000 requests/hour. Enjoy!
         </p>
       </footer>
     </div>
